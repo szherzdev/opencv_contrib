@@ -36,6 +36,7 @@
 
 #include "precomp.hpp"
 #include "dtfilter_cpu.hpp"
+#include "dtfilter_ocl.hpp"
 
 namespace cv
 {
@@ -45,15 +46,30 @@ namespace ximgproc
 CV_EXPORTS_W
 Ptr<DTFilter> createDTFilter(InputArray guide, double sigmaSpatial, double sigmaColor, int mode, int numIters)
 {
+    if (cv::ocl::useOpenCL() && guide.isUMat())
+    {
+        Ptr<DTFilter> ptr = Ptr<DTFilter>(DTFilterOCL::create(guide, sigmaSpatial, sigmaColor, mode, numIters));
+        if (ptr)
+            return ptr;
+    }
+
     return Ptr<DTFilter>(DTFilterCPU::create(guide, sigmaSpatial, sigmaColor, mode, numIters));
 }
 
 CV_EXPORTS_W
 void dtFilter(InputArray guide, InputArray src, OutputArray dst, double sigmaSpatial, double sigmaColor, int mode, int numIters)
 {
-    Ptr<DTFilterCPU> dtf = DTFilterCPU::create(guide, sigmaSpatial, sigmaColor, mode, numIters);
-    dtf->setSingleFilterCall(true);
-    dtf->filter(src, dst);
+    if (!cv::ocl::useOpenCL() && !guide.isUMat() && !src.isUMat())
+    {
+        Ptr<DTFilterCPU> dtf = DTFilterCPU::create(guide, sigmaSpatial, sigmaColor, mode, numIters);
+        dtf->setSingleFilterCall(true);
+        dtf->filter(src, dst);
+    }
+    else
+    {
+        Ptr<DTFilter> dtf = createDTFilter(guide, sigmaSpatial, sigmaColor, mode, numIters);
+        dtf->filter(src, dst);
+    }
 }
 
 }
