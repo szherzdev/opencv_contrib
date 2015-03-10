@@ -405,9 +405,9 @@ void DTFilterOCL::filterRF_iter_vert_pass(UMat& res, UMat& adist, UMat& weights)
 
 void DTFilterOCL::filterRF_naiveAlg(UMat& res, UMat& resT, UMat& adistHor, UMat& adistVert)
 {
-    ocl::Kernel kerHor("filter_RF_vert", kerProgSrcFilter, buildOptionsFlt);
-    //ocl::Kernel kerVert("filter_RF_vert", kerProgSrcFilter, buildOptionsFlt);
-    ocl::Kernel &kerVert = kerHor;
+    //ocl::Kernel kerHor("filter_RF_vert", kerProgSrcFilter, buildOptionsFlt);
+    ocl::Kernel kerVert("filter_RF_vert", kerProgSrcFilter, buildOptionsFlt);
+    ocl::Kernel &kerHor = kerVert;
     CV_Assert(!kerHor.empty() && !kerVert.empty());
 
     size_t globSizeHor[] = { h };

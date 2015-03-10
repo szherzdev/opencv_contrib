@@ -225,6 +225,49 @@ __kernel void filter_NC_vert(__global const uchar *src, int src_step, int src_of
     }
 }
 
+//__kernel void filter_RF_hor(__global uchar *res, int res_step, int res_offset, int res_rows, int res_cols,
+//                             __global uchar *adist, int adist_step, int adist_offset,
+//                             int write_new_a_dist)
+//
+//{
+//    int max_cols = res_step / sizeof(SrcVec);
+//    int batch = max_cols / get_global_size(1);
+//    int rem_count = max_cols % get_global_size(1);
+//    int my_batch = batch + (get_global_id(1) < rem_count) ? 1 : 0;
+//
+//    int gj = get_global_id(1);
+//    int i = get_global_id(0);
+//    int j0 = (batch + 1) * min(rem_count, gj) + batch * max(0, gj - rem_count);
+//
+//    if (!(j0 >= 0 && j0 < res_cols))
+//        return;
+//
+//    res   += mad24(i, res_step, res_offset);
+//    adist += mad24(i, adist_step, adist_offset);
+//
+//    SrcVec cur_val = 0;
+//    float ad;
+//    int j;
+//
+//    cur_val = getPix(res, j0);
+//    for (j = j0; j < j0 + my_batch; j++)
+//    {
+//        ad = getFloat(adist + (i-1)*adist_step, 0);
+//        cur_val = (1.0f - ad)*getPix(res + i*res_step, 0) + ad*cur_val;
+//        storePix(cur_val, res + i*res_step, 0);
+//    }
+//
+//    for (i = res_rows - 2; i >= 0; i--)
+//    {
+//        ad = getFloat(adist + i*adist_step, 0);
+//        cur_val = (1.0f - ad)*getPix(res + i*res_step, 0) + ad*cur_val;
+//        storePix(cur_val, res + i*res_step, 0);
+//
+//        if (write_new_a_dist)
+//            storeFloat(ad*ad, adist + i*adist_step, 0);
+//    }
+//}
+
 __kernel void filter_RF_vert(__global uchar *res, int res_step, int res_offset, int res_rows, int res_cols,
                              __global uchar *adist, int adist_step, int adist_offset,
                              int write_new_a_dist)
@@ -248,8 +291,6 @@ __kernel void filter_RF_vert(__global uchar *res, int res_step, int res_offset, 
         ad = getFloat(adist + (i-1)*adist_step, 0);
         cur_val = (1.0f - ad)*getPix(res + i*res_step, 0) + ad*cur_val;
         storePix(cur_val, res + i*res_step, 0);
-        
-        //barrier(CLK_LOCAL_MEM_FENCE);
     }
 
     for (i = res_rows - 2; i >= 0; i--)
@@ -260,8 +301,6 @@ __kernel void filter_RF_vert(__global uchar *res, int res_step, int res_offset, 
 
         if (write_new_a_dist)
             storeFloat(ad*ad, adist + i*adist_step, 0);
-
-        //barrier(CLK_LOCAL_MEM_FENCE);
     }
 }
 
