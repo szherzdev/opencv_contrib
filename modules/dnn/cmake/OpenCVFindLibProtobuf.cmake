@@ -6,7 +6,11 @@ endif()
 
 if(NOT BUILD_LIBPROTOBUF_FROM_SOURCES AND PROTOBUF_FOUND AND EXISTS ${PROTOBUF_PROTOC_EXECUTABLE})
   message(STATUS "The protocol buffer compiler and libprotobuf were found")
-  PROTOBUF_GENERATE_CPP(PROTOBUF_HDRS PROTOBUF_SRCS src/caffe/caffe.proto)
+  PROTOBUF_GENERATE_CPP(PROTOBUF_HDRS PROTOBUF_SRCS src/caffe/caffe.proto
+    src/tensorflow/attr_value.proto  src/tensorflow/function.proto
+    src/tensorflow/graph.proto  src/tensorflow/op_def.proto
+    src/tensorflow/tensor.proto  src/tensorflow/tensor_shape.proto
+    src/tensorflow/types.proto  src/tensorflow/versions.proto)
   add_definitions(-DHAVE_PROTOBUF=1)
 else()
   message(STATUS "Build libprotobuf from sources:")
