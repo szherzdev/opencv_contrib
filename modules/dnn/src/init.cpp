@@ -93,9 +93,11 @@ void initModule()
     REG_RUNTIME_LAYER_CLASS(AbsVal, ElementWiseLayer<AbsValFunctor>)
     REG_RUNTIME_LAYER_CLASS(Sigmoid, ElementWiseLayer<SigmoidFunctor>)
     REG_RUNTIME_LAYER_CLASS(Dropout, BlankLayer)
+    REG_RUNTIME_LAYER_CLASS(Identity, BlankLayer)
 
     REG_RUNTIME_LAYER_CLASS(Convolution, ConvolutionLayer)
     REG_RUNTIME_LAYER_CLASS(Deconvolution, DeConvolutionLayer)
+    REG_RUNTIME_LAYER_CLASS(Shift, ShiftLayer)
     REG_RUNTIME_LAYER_CLASS(Concat, ConcatLayer)
 
     init.status = true;

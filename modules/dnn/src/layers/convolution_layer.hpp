@@ -88,6 +88,20 @@ namespace dnn
         DeConvolutionLayer(LayerParams &params);
         void forward(std::vector<Blob*> &inputs, std::vector<Blob> &outputs);
     };
+
+    // Per-channel bias addition
+    class ShiftLayer : public Layer
+    {
+    protected:
+        bool useOpenCL;
+        Mat biasOnesMat;
+
+    public:
+        ShiftLayer() {}
+        ShiftLayer(LayerParams &params);
+        void allocate(const std::vector<Blob*> &inputs, std::vector<Blob> &outputs);
+        void forward(std::vector<Blob*> &inputs, std::vector<Blob> &outputs);
+    };
 }
 }
 #endif

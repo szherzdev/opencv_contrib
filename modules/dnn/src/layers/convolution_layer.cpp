@@ -265,5 +265,62 @@ namespace dnn
         if (dstMat.type() == CV_64F)
             col2im_cpu(colMat.ptr<double>(), inpGroupCn, inpH, inpW, kerH, kerW, padH, padW, strideH, strideW, dstMat.ptr<double>());
     }
+
+    ShiftLayer::ShiftLayer(LayerParams &params) : Layer(params)
+    {
+        CV_Assert(blobs.size() == 1);
+
+        //TBD
+        useOpenCL = params.has("use_opencl");
+
+        #if HAVE_CBLAS
+        {
+            if (getBlasThreads() != cv::getThreadNum())
+            {
+                setBlasThreads(cv::getThreadNum());
+            }
+        }
+        #endif
+    }
+
+    void ShiftLayer::allocate(const std::vector<Blob*> &inputs, std::vector<Blob> &outputs)
+    {
+        CV_Assert(inputs.size() > 0);
+
+        const Blob &inpBlob = *inputs[0];
+        CV_Assert(inpBlob.dims() == 4 && inpBlob.type() == CV_32F);
+        Blob &biasBlob = blobs[0];
+        CV_Assert(biasBlob.total() == inpBlob.channels());
+
+        outputs.resize(inputs.size());
+        for (size_t i = 0; i < inputs.size(); i++)
+        {
+            CV_Assert(inputs[i]->type() == inpBlob.type());
+            CV_Assert(inputs[i]->dims() == 4 && inputs[i]->channels() == inpBlob.channels());
+
+            outputs[i].shareFrom(*inputs[i]);
+        }
+
+        biasOnesMat = Mat::ones(1, inpBlob.rows() * inpBlob.cols(), inpBlob.type());
+    }
+
+    void ShiftLayer::forward(std::vector<Blob*> &inputs, std::vector<Blob> &outputs)
+    {
+      for (size_t ii = 0; ii < outputs.size(); ii++)
+      {
+        Blob &inpBlob = *inputs[ii];
+        Blob &outBlob = outputs[ii];
+
+        inpBlob.matRef().copyTo(outBlob.matRef());
+
+        for (int n = 0; n < inpBlob.num(); n++)
+        {
+          Mat dstMat(inpBlob.channels(), inpBlob.rows() * inpBlob.cols(),
+                     outBlob.type(), outBlob.ptr(n));
+          gemmCPU(blobs[0].matRef(), biasOnesMat, 1, dstMat, 1); //TODO: gemv
+        }
+      }
+    }
+
 }
 }
