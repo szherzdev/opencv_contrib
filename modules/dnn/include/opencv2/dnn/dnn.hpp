@@ -61,6 +61,14 @@ namespace dnn //! This namespace is used for dnn module functionlaity.
      */
     CV_EXPORTS_W void initModule();
 
+    /**
+     * @brief The PaddingMode enums supported padding modes for Caffe and TensorFLow compability.
+     */
+    class CV_EXPORTS PaddingMode {
+    public:
+        enum {CAFFE, VALID, SAME};
+    };
+
     /** @brief This class provides all data needed to initialize layer.
      *
      * It includes dictionary with scalar params (which can be readed by using Dict interface),

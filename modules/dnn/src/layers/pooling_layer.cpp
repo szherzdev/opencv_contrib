@@ -72,7 +72,7 @@ namespace dnn
             type = MAX;
         }
 
-        getKernelParams(params, kernelH, kernelW, padH, padW, strideH, strideW);
+        getKernelParams(params, kernelH, kernelW, padH, padW, strideH, strideW, padMode);
     }
 
     void PoolingLayer::allocate(const std::vector<Blob*> &inputs, std::vector<Blob> &outputs)
@@ -187,20 +187,28 @@ namespace dnn
 
     void PoolingLayer::computeOutputShape(int inH, int inW)
     {
-        //Yeah, something strange Caffe scheme-)
-        outH = static_cast<int>(ceil(static_cast<float>(inH + 2 * padH - kernelH) / strideH)) + 1;
-        outW = static_cast<int>(ceil(static_cast<float>(inW + 2 * padW - kernelW) / strideW)) + 1;
-
-        if (padH || padW)
+        if (padMode == PaddingMode::CAFFE)
         {
-            // If we have padding, ensure that the last pooling starts strictly
-            // inside the image (instead of at the padding); otherwise clip the last.
-            if ((outH - 1) * strideH >= inH + padH)
-                --outH;
-            if ((outW - 1) * strideW >= inW + padW)
-                --outW;
-            CV_Assert((outH - 1) * strideH < inH + padH);
-            CV_Assert((outW - 1) * strideW < inW + padW);
+            //Yeah, something strange Caffe scheme-)
+            outH = static_cast<int>(ceil(static_cast<float>(inH + 2 * padH - kernelH) / strideH)) + 1;
+            outW = static_cast<int>(ceil(static_cast<float>(inW + 2 * padW - kernelW) / strideW)) + 1;
+
+            if (padH || padW)
+            {
+                // If we have padding, ensure that the last pooling starts strictly
+                // inside the image (instead of at the padding); otherwise clip the last.
+                if ((outH - 1) * strideH >= inH + padH)
+                    --outH;
+                if ((outW - 1) * strideW >= inW + padW)
+                    --outW;
+                CV_Assert((outH - 1) * strideH < inH + padH);
+                CV_Assert((outW - 1) * strideW < inW + padW);
+            }
+        }
+        else
+        {
+            getOutputSize(inH, inW, kernelH, kernelW, strideH, strideW, padMode,
+                          outH, outW, padH, padW);
         }
     }
 }

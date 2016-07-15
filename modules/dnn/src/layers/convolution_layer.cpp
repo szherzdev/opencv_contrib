@@ -53,7 +53,7 @@ namespace dnn
 {
     ConvolutionLayer::ConvolutionLayer(LayerParams &params) : Layer(params)
     {
-        getKernelParams(params, kerH, kerW, padH, padW, strideH, strideW);
+        getKernelParams(params, kerH, kerW, padH, padW, strideH, strideW, padMode);
 
         numOutput = params.get<int>("num_output");
         bias = params.get<bool>("bias_term", true);
@@ -190,8 +190,16 @@ namespace dnn
         inpW = inpBlob.cols();
         inpCn = inpBlob.channels();
 
-        outH = (inpH + 2 * padH - kerH) / strideH + 1;
-        outW = (inpW + 2 * padW - kerW) / strideW + 1;
+        if (padMode == PaddingMode::CAFFE)
+        {
+            outH = (inpH + 2 * padH - kerH) / strideH + 1;
+            outW = (inpW + 2 * padW - kerW) / strideW + 1;
+        }
+        else
+        {
+            getOutputSize(inpH, inpW, kerH, kerW, strideH, strideW, padMode,
+                          outH, outW, padH, padW);
+        }
         outCn = numOutput;
 
         topH = outH; topW = outW; topCn = outCn;

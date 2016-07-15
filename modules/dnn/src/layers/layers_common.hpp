@@ -48,8 +48,10 @@ namespace cv
 namespace dnn
 {
 
-void getKernelParams(LayerParams &params, int &kernelH, int &kernelW, int &padH, int &padW, int &strideH, int &strideW);
-
+void getKernelParams(LayerParams &params, int &kernelH, int &kernelW, int &padH, int &padW, int &strideH, int &strideW, int &paddingMode);
+void getOutputSize(int inputH, int inputW, int kernelH, int kernelW,
+                   int strideH, int strideW, int paddingMode,
+                   int &outH, int &outW, int &padH, int &padW);
 }
 }
 

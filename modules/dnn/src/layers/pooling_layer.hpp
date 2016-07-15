@@ -60,6 +60,7 @@ namespace dnn
         int padH, padW;
         int strideH, strideW;
         int kernelH, kernelW;
+        int padMode;
 
         int inpH, inpW;
         int outH, outW;
